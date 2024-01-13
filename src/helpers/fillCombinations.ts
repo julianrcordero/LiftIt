@@ -21,15 +21,12 @@
 // }
 
 export const fillCombinations = (
-  plates: { color: string; kg: number; lb: number }[],
-  combinations: {
-    sum: number;
-    words: string;
-  }[],
-  setCombinations: () => any
+  plates: { color: string; kg: number; lb: number }[]
 ) => {
   const size = Math.pow(2, plates.length);
   let sum = 0;
+  //   let combinations = new Map<number, string[]>(); //{ sum: number; words: string }[] = [];
+  let combinations = new Array<Array<string>>();
 
   for (let i = 0; i < size; i++) {
     let words = "";
@@ -38,24 +35,23 @@ export const fillCombinations = (
     let num = i.toString(2);
     num = "0000000000000000".substring(num.length) + num;
 
-    // console.log("binary num = ", num);
-
-    // for (let index = 0; index < num.length; index++) {
-    //   console.log(parseInt(num.charAt(index), 0));
-    // }
-
     for (let j = 0; j < plates.length; j++) {
       const thisChar = num.charAt(num.length - 1 - j);
 
-    //   console.log("num[", j, "]", thisChar);
       const parsedInteger = parseInt(thisChar, 10);
-    //   console.log("parsedInteger", parsedInteger);
       if (parsedInteger > 0) {
         sum += 2 * plates[j].lb;
         words += " - ".concat(String(plates[j].lb).concat(" pair"));
       }
     }
-    console.log("add sum", sum);
-    setCombinations([...combinations, { sum: sum, words: words }]);
+
+    combinations[sum]
+      ? combinations[sum].push(words)
+      : (combinations[sum] = [words]);
+    // combinations.has(sum)
+    //   ? combinations.get(sum)?.push(words)
+    //   : combinations.set(sum, [words]);
   }
+  return combinations;
+  //   return new Map(Array.from(combinations).sort((a, b) => a[0] - b[0]));
 };

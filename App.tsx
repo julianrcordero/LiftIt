@@ -1,6 +1,14 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { Dimensions, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import {
+  Dimensions,
+  FlatList,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { PlateVals } from "./src/enums/plateVals";
 import { MyButton } from "./src/components/MyButton";
 import { Flange, Knurling, Shaft, Sleeve } from "./src/components/Barbell";
@@ -40,12 +48,8 @@ export default function App() {
   const [isIWF, setIsIWF] = useState(true);
 
   const [isCombinationMaker, setIsCombinationMaker] = useState(false);
-  const [combinations, setCombinations] = useState<
-    {
-      sum: number;
-      words: string;
-    }[]
-  >([]);
+  const [combinations, setCombinations] = useState<Array<Array<string>>>(); //Map<number, string[]>>();
+  const [selectedCombination, setSelectedCombination] = useState(45);
 
   // useEffect(() => {
   //   const subscription = Dimensions.addEventListener(
@@ -64,12 +68,14 @@ export default function App() {
     );
     setTotalWeight((isKG ? 20 : 45) + sumPlates * 2);
 
-    fillCombinations(plates, combinations, setCombinations);
+    setCombinations(fillCombinations(plates));
+    // console.log(plates);
   }, [isKG, plates]);
 
-  // useEffect(() => {
-  //   console.log(combinations);
-  // }, [combinations]);
+  useEffect(() => {
+    console.log("ALL COMBINATIONS");
+    combinations?.forEach((value, key) => console.log(key, value));
+  }, [combinations]);
 
   const updatePlates = (newPlateColor: string) => {
     setPlates([
@@ -105,6 +111,54 @@ export default function App() {
     });
   };
 
+  const displayCombinations = () => {
+    // return (
+    //   <FlatList
+    //     data={combinations}
+    //     renderItem={({ item, index }) => <Text>{index}</Text>}
+    //     keyExtractor={(item, index) => item.}
+    //   />
+    // );
+    return (
+      <View style={{ flexDirection: "row" }}>
+        <ScrollView
+          contentContainerStyle={
+            {
+              // justifyContent: "center",
+            }
+          }
+          style={{
+            borderWidth: 1,
+            borderColor: "red",
+            height: 100,
+          }}
+        >
+          {combinations?.map((value, key) => {
+            return (
+              <MyButton
+                title={key}
+                onPress={() => setSelectedCombination(key)}
+              />
+              // <Text
+              //   style={{
+              //     fontSize: 30,
+              //     borderWidth: 1,
+              //     padding: 10,
+              //     textAlign: "center",
+              //   }}
+              // >
+              //   {key}
+              //   {/* {value} */}
+              // </Text>
+            );
+          })}
+        </ScrollView>
+        <Text>{combinations}</Text>
+      </View>
+    );
+    //  <Text style={{ fontSize: 20, borderWidth: 1 }}>MONKEY</Text>;
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View
@@ -133,7 +187,7 @@ export default function App() {
         }}
       >
         {isCombinationMaker ? (
-          <View style={{ flexDirection: "row" }}>{displayPlates()}</View>
+          <View style={{ flexDirection: "row" }}>{displayCombinations()}</View>
         ) : (
           <Shaft length={barLength} diameter={barDiameter}>
             <Sleeve
