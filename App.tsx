@@ -6,6 +6,7 @@ import { MyButton } from "./src/components/MyButton";
 import { Flange, Knurling, Shaft, Sleeve } from "./src/components/Barbell";
 import { Plate } from "./src/components/Plates";
 import { getPlateWeight } from "./src/helpers/getPlateWeights";
+import { fillCombinations } from "./src/helpers/fillCombinations";
 
 const windowDimensions = Dimensions.get("window");
 // const screenDimensions = Dimensions.get("screen");
@@ -38,6 +39,14 @@ export default function App() {
   const [isKG, setIsKG] = useState(true);
   const [isIWF, setIsIWF] = useState(true);
 
+  const [isCombinationMaker, setIsCombinationMaker] = useState(false);
+  const [combinations, setCombinations] = useState<
+    {
+      sum: number;
+      words: string;
+    }[]
+  >([]);
+
   // useEffect(() => {
   //   const subscription = Dimensions.addEventListener(
   //     "change",
@@ -54,7 +63,13 @@ export default function App() {
       0
     );
     setTotalWeight((isKG ? 20 : 45) + sumPlates * 2);
+
+    fillCombinations(plates, combinations, setCombinations);
   }, [isKG, plates]);
+
+  // useEffect(() => {
+  //   console.log(combinations);
+  // }, [combinations]);
 
   const updatePlates = (newPlateColor: string) => {
     setPlates([
@@ -79,42 +94,67 @@ export default function App() {
   const displayPlates = () => {
     return plates.map((x, i) => {
       return (
-        <Plate barLength={barLength} color={x.color} isKG={isKG} isIWF={isIWF} key={i} />
+        <Plate
+          barLength={barLength}
+          color={x.color}
+          isKG={isKG}
+          isIWF={isIWF}
+          key={i}
+        />
       );
     });
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <MyButton
-        title={(isIWF ? "WEIGHTLIFTING" : "POWERLIFTING") + " MODE"}
-        onPress={() => setIsIWF(!isIWF)}
-      />
+      <View
+        style={{
+          justifyContent: "flex-start",
+          flexDirection: "row",
+          borderWidth: 1,
+          width: barLength * 0.6,
+        }}
+      >
+        <MyButton
+          title={(isIWF ? "WEIGHTLIFTING" : "POWERLIFTING") + " MODE"}
+          onPress={() => setIsIWF(!isIWF)}
+          style={{ marginRight: 20 }}
+        />
+        <MyButton
+          title={isCombinationMaker ? "COMBINATION MAKER" : "TOTALER"}
+          onPress={() => setIsCombinationMaker(!isCombinationMaker)}
+        />
+      </View>
+
       <View
         style={{
           height: barLength * 0.204545454545455,
           justifyContent: "center",
         }}
       >
-        <Shaft length={barLength} diameter={barDiameter}>
-          <Sleeve
-            left={true}
-            diameter={sleeveDiameter}
-            width={loadableSleeveLength + flangeWidth}
-          >
-            <Flange diameter={flangeDiameter} width={flangeWidth} />
-            {displayPlates()}
-          </Sleeve>
-          <Knurling barLength={barLength} />
-          <Sleeve
-            left={false}
-            diameter={sleeveDiameter}
-            width={loadableSleeveLength + flangeWidth}
-          >
-            <Flange diameter={flangeDiameter} width={flangeWidth} />
-            {displayPlates()}
-          </Sleeve>
-        </Shaft>
+        {isCombinationMaker ? (
+          <View style={{ flexDirection: "row" }}>{displayPlates()}</View>
+        ) : (
+          <Shaft length={barLength} diameter={barDiameter}>
+            <Sleeve
+              left={true}
+              diameter={sleeveDiameter}
+              width={loadableSleeveLength + flangeWidth}
+            >
+              <Flange diameter={flangeDiameter} width={flangeWidth} />
+              {displayPlates()}
+            </Sleeve>
+            <Knurling barLength={barLength} />
+            <Sleeve
+              left={false}
+              diameter={sleeveDiameter}
+              width={loadableSleeveLength + flangeWidth}
+            >
+              <Flange diameter={flangeDiameter} width={flangeWidth} />
+              {displayPlates()}
+            </Sleeve>
+          </Shaft>
+        )}
       </View>
       <View style={styles.weightAmountRow}>
         <Text>WEIGHT TOTAL : </Text>
