@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { PlateVals } from "./src/enums/plateVals";
 import { MyButton } from "./src/components/MyButton";
 import { Flange, Knurling, Shaft, Sleeve } from "./src/components/Barbell";
@@ -49,7 +50,8 @@ export default function App() {
 
   const [isCombinationMaker, setIsCombinationMaker] = useState(false);
   const [combinations, setCombinations] = useState<Array<Array<string>>>(); //Map<number, string[]>>();
-  const [selectedCombination, setSelectedCombination] = useState(45);
+  const [selectedWeight, setSelectedWeight] = useState(45);
+  const [selectedCombo, setSelectedCombo] = useState(0);
 
   // useEffect(() => {
   //   const subscription = Dimensions.addEventListener(
@@ -67,15 +69,20 @@ export default function App() {
       0
     );
     setTotalWeight((isKG ? 20 : 45) + sumPlates * 2);
-
     setCombinations(fillCombinations(plates));
-    // console.log(plates);
   }, [isKG, plates]);
 
   useEffect(() => {
     console.log("ALL COMBINATIONS");
-    combinations?.forEach((value, key) => console.log(key, value));
+    combinations?.forEach((value, key) => {
+      console.log(key, value);
+      console.log("There are", value.length, "elements");
+    });
   }, [combinations]);
+
+  useEffect(() => {
+    console.log();
+  }, []);
 
   const updatePlates = (newPlateColor: string) => {
     setPlates([
@@ -112,51 +119,40 @@ export default function App() {
   };
 
   const displayCombinations = () => {
-    // return (
-    //   <FlatList
-    //     data={combinations}
-    //     renderItem={({ item, index }) => <Text>{index}</Text>}
-    //     keyExtractor={(item, index) => item.}
-    //   />
-    // );
     return (
-      <View style={{ flexDirection: "row" }}>
-        <ScrollView
-          contentContainerStyle={
-            {
-              // justifyContent: "center",
-            }
-          }
-          style={{
-            borderWidth: 1,
-            borderColor: "red",
-            height: 100,
-          }}
-        >
-          {combinations?.map((value, key) => {
-            return (
+      <ScrollView
+        style={{
+          borderWidth: 1,
+          borderColor: "red",
+          height: 100,
+          width: 50,
+        }}
+      >
+        {combinations?.map((value, key) => {
+          return (
+            key > 0 && (
               <MyButton
                 title={key}
-                onPress={() => setSelectedCombination(key)}
+                onPress={() => setSelectedWeight(key)}
+                key={key}
+                style={{ marginBottom: 10 }}
               />
-              // <Text
-              //   style={{
-              //     fontSize: 30,
-              //     borderWidth: 1,
-              //     padding: 10,
-              //     textAlign: "center",
-              //   }}
-              // >
-              //   {key}
-              //   {/* {value} */}
-              // </Text>
-            );
-          })}
-        </ScrollView>
-        <Text>{combinations}</Text>
-      </View>
+            )
+            // <Text
+            //   style={{
+            //     fontSize: 30,
+            //     borderWidth: 1,
+            //     padding: 10,
+            //     textAlign: "center",
+            //   }}
+            // >
+            //   {key}
+            //   {/* {value} */}
+            // </Text>
+          );
+        })}
+      </ScrollView>
     );
-    //  <Text style={{ fontSize: 20, borderWidth: 1 }}>MONKEY</Text>;
   };
 
   return (
@@ -184,10 +180,70 @@ export default function App() {
         style={{
           height: barLength * 0.204545454545455,
           justifyContent: "center",
+          borderWidth: 1,
         }}
       >
         {isCombinationMaker ? (
-          <View style={{ flexDirection: "row" }}>{displayCombinations()}</View>
+          <View
+            style={{
+              alignItems: "center",
+              flexDirection: "row",
+              backgroundColor: "yellow",
+              // justifyContent: "flex-start",
+            }}
+          >
+            {/* {displayCombinations()} */}
+            <View
+              style={{
+                backgroundColor: "green",
+                // borderWidth: 2,
+                justifyContent: "center",
+                width: 100,
+                height: 100,
+              }}
+            >
+              <Picker
+                selectedValue={selectedWeight}
+                onValueChange={(itemValue, itemIndex) =>
+                  setSelectedWeight(itemValue)
+                }
+              >
+                {combinations?.map((value, key) => {
+                  return (
+                    key > 0 && (
+                      <Picker.Item label={String(key)} value={key} key={key} />
+                    )
+                  );
+                })}
+              </Picker>
+            </View>
+            <View
+              style={{
+                backgroundColor: "green",
+                borderWidth: 2,
+                justifyContent: "center",
+                width: 250,
+                height: 100,
+              }}
+            >
+              <Picker
+                selectedValue={selectedCombo}
+                onValueChange={(itemValue, itemIndex) =>
+                  setSelectedCombo(itemIndex)
+                }
+              >
+                {combinations[selectedWeight]?.map((value, index) => {
+                  return (
+                    <Picker.Item label={value} value={index} key={index} />
+                  );
+                  // <Text>
+                  //   {value}
+                  //   {"\n"}
+                  // </Text>
+                })}
+              </Picker>
+            </View>
+          </View>
         ) : (
           <Shaft length={barLength} diameter={barDiameter}>
             <Sleeve
@@ -263,7 +319,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
+    // alignItems: "center",
     justifyContent: "space-evenly",
   },
   totalWeight: { fontSize: 24, marginRight: 10 },
