@@ -74,10 +74,8 @@ export default function App() {
   }, [isKG, plates]);
 
   useEffect(() => {
-    // console.log("ALL COMBINATIONS");
     combinations?.forEach((value, key) => {
-      // console.log(key, value);
-      // console.log("There are", value.length, "elements");
+      console.log(key, value);
     });
   }, [combinations]);
 
@@ -119,43 +117,6 @@ export default function App() {
     });
   };
 
-  const displayCombinations = () => {
-    return (
-      <ScrollView
-        style={{
-          borderWidth: 1,
-          borderColor: "red",
-          height: 100,
-          width: 50,
-        }}
-      >
-        {combinations?.map((value, key) => {
-          return (
-            key > 0 && (
-              <MyButton
-                title={key}
-                onPress={() => setSelectedWeight(key)}
-                key={key}
-                style={{ marginBottom: 10 }}
-              />
-            )
-            // <Text
-            //   style={{
-            //     fontSize: 30,
-            //     borderWidth: 1,
-            //     padding: 10,
-            //     textAlign: "center",
-            //   }}
-            // >
-            //   {key}
-            //   {/* {value} */}
-            // </Text>
-          );
-        })}
-      </ScrollView>
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <View
@@ -189,17 +150,12 @@ export default function App() {
             style={{
               alignItems: "center",
               flexDirection: "row",
-              backgroundColor: "yellow",
-              // justifyContent: "flex-start",
             }}
           >
-            {/* {displayCombinations()} */}
             <View
               style={{
-                backgroundColor: "green",
-                // borderWidth: 2,
                 justifyContent: "center",
-                width: 100,
+                width: 150,
                 height: 100,
               }}
             >
@@ -210,9 +166,17 @@ export default function App() {
                 }
               >
                 {combinations?.map((value, key) => {
+                  let sum = 45;
+                  value[0]?.forEach((v) => (sum += v.lb * 2));
+                  //get first combo since they're all same
+
                   return (
                     key > 0 && (
-                      <Picker.Item label={String(key)} value={key} key={key} />
+                      <Picker.Item
+                        label={String(isKG ? key : sum)}
+                        value={key}
+                        key={key}
+                      />
                     )
                   );
                 })}
@@ -220,10 +184,8 @@ export default function App() {
             </View>
             <View
               style={{
-                backgroundColor: "green",
                 borderWidth: 2,
                 justifyContent: "center",
-                flexShrink: 1,
                 width: 260,
                 height: 100,
               }}
@@ -250,7 +212,7 @@ export default function App() {
                 })}
               </Picker>
             </View>
-            <View style={{ flex: 0.6 }}></View>
+            {/* <View style={{ flex: 0.5 }}></View> */}
           </View>
         ) : (
           <Shaft length={barLength} diameter={barDiameter}>

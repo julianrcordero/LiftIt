@@ -10,7 +10,6 @@ export const fillCombinations = (plates: PlateType[]) => {
 
     let num = i.toString(2);
     num = "0000000000000000".substring(num.length) + num;
-    console.log("binary num is", num);
 
     for (let j = 0; j < plates.length; j++) {
       const thisChar = num.charAt(num.length - 1 - j);
@@ -19,13 +18,8 @@ export const fillCombinations = (plates: PlateType[]) => {
       if (parsedInteger > 0) {
         sum += 2 * plates[j].kg;
         words.push(plates[j]);
-        // words += " - ".concat(String(plates[j].lb).concat(" pair"));
       }
     }
-    // if (combinations[i]) {
-    //   console.log("adding", words);
-    //   combinations[i].push(words);
-    // } else combinations[i] = [words];
     combinations[sum]
       ? combinations[sum].push(words)
       : (combinations[sum] = [words]);
