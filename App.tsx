@@ -16,6 +16,7 @@ import { Flange, Knurling, Shaft, Sleeve } from "./src/components/Barbell";
 import { Plate } from "./src/components/Plates";
 import { getPlateWeight } from "./src/helpers/getPlateWeights";
 import { fillCombinations } from "./src/helpers/fillCombinations";
+import PlateType from "./src/types/Plate";
 
 const windowDimensions = Dimensions.get("window");
 // const screenDimensions = Dimensions.get("screen");
@@ -39,9 +40,7 @@ export default function App() {
 
   const [flangeWidth, setFlangeWidth] = useState(barLength * 0.013636363636364);
 
-  const [plates, setPlates] = useState<
-    { color: string; kg: number; lb: number }[]
-  >([]);
+  const [plates, setPlates] = useState<PlateType[]>([]);
 
   const [totalWeight, setTotalWeight] = useState<number>(20);
 
@@ -49,7 +48,9 @@ export default function App() {
   const [isIWF, setIsIWF] = useState(true);
 
   const [isCombinationMaker, setIsCombinationMaker] = useState(false);
-  const [combinations, setCombinations] = useState<Array<Array<string>>>(); //Map<number, string[]>>();
+  const [combinations, setCombinations] = useState<
+    Array<Array<Array<PlateType>>>
+  >([]); //Map<number, string[]>>();
   const [selectedWeight, setSelectedWeight] = useState(45);
   const [selectedCombo, setSelectedCombo] = useState(0);
 
@@ -73,10 +74,10 @@ export default function App() {
   }, [isKG, plates]);
 
   useEffect(() => {
-    console.log("ALL COMBINATIONS");
+    // console.log("ALL COMBINATIONS");
     combinations?.forEach((value, key) => {
-      console.log(key, value);
-      console.log("There are", value.length, "elements");
+      // console.log(key, value);
+      // console.log("There are", value.length, "elements");
     });
   }, [combinations]);
 
@@ -222,7 +223,8 @@ export default function App() {
                 backgroundColor: "green",
                 borderWidth: 2,
                 justifyContent: "center",
-                width: 250,
+                flexShrink: 1,
+                width: 260,
                 height: 100,
               }}
             >
@@ -233,16 +235,22 @@ export default function App() {
                 }
               >
                 {combinations[selectedWeight]?.map((value, index) => {
-                  return (
-                    <Picker.Item label={value} value={index} key={index} />
+                  const weightArray: string[] = [];
+                  value.forEach((v) =>
+                    weightArray.push(String(isKG ? v.kg : v.lb))
                   );
-                  // <Text>
-                  //   {value}
-                  //   {"\n"}
-                  // </Text>
+
+                  return (
+                    <Picker.Item
+                      label={weightArray.toString()}
+                      value={index}
+                      key={index}
+                    />
+                  );
                 })}
               </Picker>
             </View>
+            <View style={{ flex: 0.6 }}></View>
           </View>
         ) : (
           <Shaft length={barLength} diameter={barDiameter}>
