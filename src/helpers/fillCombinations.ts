@@ -1,12 +1,12 @@
 import PlateType from "../types/Plate";
 
-export const fillCombinations = (plates: PlateType[]) => {
+export const fillCombinations = (plates: PlateType[], isKG: boolean) => {
   const size = Math.pow(2, plates.length);
   let combinations = new Array<Array<Array<PlateType>>>([]);
 
   for (let i = 0; i < size; i++) {
     let words: Array<PlateType> = [];
-    let sum = 20;
+    let sum = isKG ? 20 : 45;
 
     let num = i.toString(2);
     num = "0000000000000000".substring(num.length) + num;
@@ -16,7 +16,7 @@ export const fillCombinations = (plates: PlateType[]) => {
 
       const parsedInteger = parseInt(thisChar, 10);
       if (parsedInteger > 0) {
-        sum += 2 * plates[j].kg;
+        sum += 2 * (isKG ? plates[j].kg : plates[j].lb);
         words.push(plates[j]);
       }
     }

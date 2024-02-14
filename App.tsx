@@ -1,16 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import {
-  Dimensions,
-  FlatList,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Dimensions, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { PlateVals } from "./src/enums/plateVals";
 import { MyButton } from "./src/components/MyButton";
 import { Flange, Knurling, Shaft, Sleeve } from "./src/components/Barbell";
 import { Plate } from "./src/components/Plates";
@@ -48,10 +39,7 @@ export default function App() {
   const [isIWF, setIsIWF] = useState(true);
 
   const [isCombinationMaker, setIsCombinationMaker] = useState(false);
-  const [lbCombinations, setLbCombinations] = useState<
-    Array<Array<Array<PlateType>>>
-  >([]);
-  const [kgCombinations, setKgCombinations] = useState<
+  const [combinations, setCombinations] = useState<
     Array<Array<Array<PlateType>>>
   >([]);
   const [selectedWeight, setSelectedWeight] = useState(45);
@@ -73,8 +61,7 @@ export default function App() {
       0
     );
     setTotalWeight((isKG ? 20 : 45) + sumPlates * 2);
-    setLbCombinations(fillCombinations(plates));
-    setKgCombinations(fillCombinations(plates));
+    setCombinations(fillCombinations(plates, isKG));
   }, [isKG, plates]);
 
   // useEffect(() => {
@@ -100,7 +87,6 @@ export default function App() {
 
   const clearBar = () => {
     setPlates([]);
-    setTotalWeight(20);
   };
 
   const displayPlates = () => {
@@ -118,8 +104,7 @@ export default function App() {
   };
 
   const fillTotalPicker = () => {
-    const myCombinations = isKG ? kgCombinations : lbCombinations;
-    return myCombinations?.map((value, key) => {
+    return combinations?.map((value, key) => {
       let sum = 45;
       value[0]?.forEach((v) => {
         sum += v.lb * 2;
@@ -136,8 +121,7 @@ export default function App() {
   };
 
   const fillCombinationPicker = () => {
-    const myCombinations = isKG ? kgCombinations : lbCombinations;
-    return myCombinations[selectedWeight]?.map((value, index) => {
+    return combinations[selectedWeight]?.map((value, index) => {
       const weightArray: string[] = [];
       value.forEach((v) => weightArray.push(String(isKG ? v.kg : v.lb)));
 
@@ -148,10 +132,9 @@ export default function App() {
   };
 
   const displayPlateCombination = () => {
-    const myCombinations = isKG ? kgCombinations : lbCombinations;
     return (
-      myCombinations[selectedWeight] &&
-      myCombinations[selectedWeight][selectedCombo]?.map((v, i) => {
+      combinations[selectedWeight] &&
+      combinations[selectedWeight][selectedCombo]?.map((v, i) => {
         return (
           <Plate
             barLength={barLength}
@@ -232,12 +215,28 @@ export default function App() {
                   // console.log(itemValue, "selected");
                   setSelectedCombo(itemIndex);
                 }}
+                onLayout={() => setSelectedCombo(0)}
               >
                 {fillCombinationPicker()}
               </Picker>
             </View>
-            <View style={{ flex: 0.5, flexDirection: "row" }}>
-              {displayPlateCombination()}
+            <View
+              style={{
+                flex: 1,
+                paddingLeft: 50,
+              }}
+            >
+              <Shaft length={50} diameter={barDiameter}>
+                <View style={{ width: 50 }}></View>
+                <Sleeve
+                  left={false}
+                  diameter={sleeveDiameter}
+                  width={loadableSleeveLength + flangeWidth}
+                >
+                  <Flange diameter={flangeDiameter} width={flangeWidth} />
+                  {displayPlateCombination()}
+                </Sleeve>
+              </Shaft>
             </View>
           </View>
         ) : (
