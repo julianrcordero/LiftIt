@@ -48,9 +48,12 @@ export default function App() {
   const [isIWF, setIsIWF] = useState(true);
 
   const [isCombinationMaker, setIsCombinationMaker] = useState(false);
-  const [combinations, setCombinations] = useState<
+  const [lbCombinations, setLbCombinations] = useState<
     Array<Array<Array<PlateType>>>
-  >([]); //Map<number, string[]>>();
+  >([]);
+  const [kgCombinations, setKgCombinations] = useState<
+    Array<Array<Array<PlateType>>>
+  >([]);
   const [selectedWeight, setSelectedWeight] = useState(45);
   const [selectedCombo, setSelectedCombo] = useState(0);
 
@@ -70,18 +73,15 @@ export default function App() {
       0
     );
     setTotalWeight((isKG ? 20 : 45) + sumPlates * 2);
-    setCombinations(fillCombinations(plates));
+    setLbCombinations(fillCombinations(plates));
+    setKgCombinations(fillCombinations(plates));
   }, [isKG, plates]);
 
-  useEffect(() => {
-    combinations?.forEach((value, key) => {
-      console.log(key, value);
-    });
-  }, [combinations]);
-
-  useEffect(() => {
-    console.log();
-  }, []);
+  // useEffect(() => {
+  //   combinations?.forEach((value, key) => {
+  //     // console.log(key, value);
+  //   });
+  // }, [combinations]);
 
   const updatePlates = (newPlateColor: string) => {
     setPlates([
@@ -117,14 +117,63 @@ export default function App() {
     });
   };
 
+  const fillTotalPicker = () => {
+    const myCombinations = isKG ? kgCombinations : lbCombinations;
+    return myCombinations?.map((value, key) => {
+      let sum = 45;
+      value[0]?.forEach((v) => {
+        sum += v.lb * 2;
+        console.log("sum is now", sum);
+      });
+      //get first combo since they're all same
+
+      return (
+        key > 0 && (
+          <Picker.Item label={String(isKG ? key : sum)} value={key} key={key} />
+        )
+      );
+    });
+  };
+
+  const fillCombinationPicker = () => {
+    const myCombinations = isKG ? kgCombinations : lbCombinations;
+    return myCombinations[selectedWeight]?.map((value, index) => {
+      const weightArray: string[] = [];
+      value.forEach((v) => weightArray.push(String(isKG ? v.kg : v.lb)));
+
+      return (
+        <Picker.Item label={weightArray.toString()} value={index} key={index} />
+      );
+    });
+  };
+
+  const displayPlateCombination = () => {
+    const myCombinations = isKG ? kgCombinations : lbCombinations;
+    return (
+      myCombinations[selectedWeight] &&
+      myCombinations[selectedWeight][selectedCombo]?.map((v, i) => {
+        return (
+          <Plate
+            barLength={barLength}
+            color={v.color}
+            isKG={isKG}
+            isIWF={isIWF}
+            key={i}
+          />
+        );
+      })
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View
         style={{
+          backgroundColor: "green",
           justifyContent: "flex-start",
           flexDirection: "row",
           borderWidth: 1,
-          width: barLength * 0.6,
+          width: "100%", //barLength * 0.6,
         }}
       >
         <MyButton
@@ -135,6 +184,7 @@ export default function App() {
         <MyButton
           title={isCombinationMaker ? "COMBINATION MAKER" : "TOTALER"}
           onPress={() => setIsCombinationMaker(!isCombinationMaker)}
+          style={{ backgroundColor: "blue" }}
         />
       </View>
 
@@ -165,21 +215,7 @@ export default function App() {
                   setSelectedWeight(itemValue)
                 }
               >
-                {combinations?.map((value, key) => {
-                  let sum = 45;
-                  value[0]?.forEach((v) => (sum += v.lb * 2));
-                  //get first combo since they're all same
-
-                  return (
-                    key > 0 && (
-                      <Picker.Item
-                        label={String(isKG ? key : sum)}
-                        value={key}
-                        key={key}
-                      />
-                    )
-                  );
-                })}
+                {fillTotalPicker()}
               </Picker>
             </View>
             <View
@@ -192,27 +228,17 @@ export default function App() {
             >
               <Picker
                 selectedValue={selectedCombo}
-                onValueChange={(itemValue, itemIndex) =>
-                  setSelectedCombo(itemIndex)
-                }
+                onValueChange={(itemValue, itemIndex) => {
+                  // console.log(itemValue, "selected");
+                  setSelectedCombo(itemIndex);
+                }}
               >
-                {combinations[selectedWeight]?.map((value, index) => {
-                  const weightArray: string[] = [];
-                  value.forEach((v) =>
-                    weightArray.push(String(isKG ? v.kg : v.lb))
-                  );
-
-                  return (
-                    <Picker.Item
-                      label={weightArray.toString()}
-                      value={index}
-                      key={index}
-                    />
-                  );
-                })}
+                {fillCombinationPicker()}
               </Picker>
             </View>
-            {/* <View style={{ flex: 0.5 }}></View> */}
+            <View style={{ flex: 0.5, flexDirection: "row" }}>
+              {displayPlateCombination()}
+            </View>
           </View>
         ) : (
           <Shaft length={barLength} diameter={barDiameter}>
