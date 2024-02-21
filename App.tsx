@@ -44,6 +44,7 @@ export default function App() {
   >([]);
   const [selectedWeight, setSelectedWeight] = useState(45);
   const [selectedCombo, setSelectedCombo] = useState(0);
+  const [useEffectCount, setUseEffectCount] = useState(0);
 
   // useEffect(() => {
   //   const subscription = Dimensions.addEventListener(
@@ -62,6 +63,8 @@ export default function App() {
     );
     setTotalWeight((isKG ? 20 : 45) + sumPlates * 2);
     setCombinations(fillCombinations(plates, isKG));
+    console.log("reload", useEffectCount);
+    setUseEffectCount(useEffectCount + 1);
   }, [isKG, plates]);
 
   // useEffect(() => {
@@ -108,7 +111,7 @@ export default function App() {
       let sum = 45;
       value[0]?.forEach((v) => {
         sum += v.lb * 2;
-        console.log("sum is now", sum);
+        // console.log("sum is now", sum);
       });
       //get first combo since they're all same
 
@@ -149,157 +152,167 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View
-        style={{
-          backgroundColor: "green",
-          justifyContent: "flex-start",
-          flexDirection: "row",
-          borderWidth: 1,
-          width: "100%", //barLength * 0.6,
-        }}
-      >
-        <MyButton
-          title={(isIWF ? "WEIGHTLIFTING" : "POWERLIFTING") + " MODE"}
-          onPress={() => setIsIWF(!isIWF)}
-          style={{ marginRight: 20 }}
-        />
-        <MyButton
-          title={isCombinationMaker ? "COMBINATION MAKER" : "TOTALER"}
-          onPress={() => setIsCombinationMaker(!isCombinationMaker)}
-          style={{ backgroundColor: "blue" }}
-        />
-      </View>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <View style={styles.weightAmountRow}>
+          <MyButton
+            title={(isIWF ? "WEIGHTLIFTING" : "POWERLIFTING") + " MODE"}
+            onPress={() => setIsIWF(!isIWF)}
+            style={{ marginRight: 20, width: 180 }}
+          />
+          <MyButton
+            title={isCombinationMaker ? "COMBINATION MAKER" : "TOTALER"}
+            onPress={() => setIsCombinationMaker(!isCombinationMaker)}
+            style={{ width: 180 }}
+          />
+        </View>
 
-      <View
-        style={{
-          height: barLength * 0.204545454545455,
-          justifyContent: "center",
-          borderWidth: 1,
-        }}
-      >
-        {isCombinationMaker ? (
+        <View
+          style={{
+            height: barLength * 0.204545454545455,
+            justifyContent: "center",
+            borderWidth: 1,
+          }}
+        >
+          {isCombinationMaker ? (
+            <View
+              style={{
+                alignItems: "center",
+                flexDirection: "row",
+              }}
+            >
+              <View
+                style={{
+                  justifyContent: "center",
+                  width: 150,
+                  height: 100,
+                }}
+              >
+                <Picker
+                  selectedValue={selectedWeight}
+                  onValueChange={(itemValue, itemIndex) =>
+                    setSelectedWeight(itemValue)
+                  }
+                >
+                  {fillTotalPicker()}
+                </Picker>
+              </View>
+              <View
+                style={{
+                  borderWidth: 2,
+                  justifyContent: "center",
+                  width: 260,
+                  height: 100,
+                }}
+              >
+                <Picker
+                  selectedValue={selectedCombo}
+                  onValueChange={(itemValue, itemIndex) => {
+                    // console.log(itemValue, "selected");
+                    setSelectedCombo(itemIndex);
+                  }}
+                  onLayout={() => setSelectedCombo(0)}
+                >
+                  {fillCombinationPicker()}
+                </Picker>
+              </View>
+              <View
+                style={{
+                  flex: 1,
+                  paddingLeft: 50,
+                }}
+              >
+                <Shaft length={50} diameter={barDiameter}>
+                  <View style={{ width: 50 }}></View>
+                  <Sleeve
+                    left={false}
+                    diameter={sleeveDiameter}
+                    width={loadableSleeveLength + flangeWidth}
+                  >
+                    <Flange diameter={flangeDiameter} width={flangeWidth} />
+                    {displayPlateCombination()}
+                  </Sleeve>
+                </Shaft>
+              </View>
+            </View>
+          ) : (
+            <Shaft length={barLength} diameter={barDiameter}>
+              <Sleeve
+                left={true}
+                diameter={sleeveDiameter}
+                width={loadableSleeveLength + flangeWidth}
+              >
+                <Flange diameter={flangeDiameter} width={flangeWidth} />
+                {displayPlates()}
+              </Sleeve>
+              <Knurling barLength={barLength} />
+              <Sleeve
+                left={false}
+                diameter={sleeveDiameter}
+                width={loadableSleeveLength + flangeWidth}
+              >
+                <Flange diameter={flangeDiameter} width={flangeWidth} />
+                {displayPlates()}
+              </Sleeve>
+            </Shaft>
+          )}
+        </View>
+        <View style={styles.weightAmountRow}>
           <View
             style={{
+              width: 180,
               alignItems: "center",
               flexDirection: "row",
+              borderWidth: 1,
             }}
           >
-            <View
-              style={{
-                justifyContent: "center",
-                width: 150,
-                height: 100,
-              }}
-            >
-              <Picker
-                selectedValue={selectedWeight}
-                onValueChange={(itemValue, itemIndex) =>
-                  setSelectedWeight(itemValue)
-                }
-              >
-                {fillTotalPicker()}
-              </Picker>
-            </View>
-            <View
-              style={{
-                borderWidth: 2,
-                justifyContent: "center",
-                width: 260,
-                height: 100,
-              }}
-            >
-              <Picker
-                selectedValue={selectedCombo}
-                onValueChange={(itemValue, itemIndex) => {
-                  // console.log(itemValue, "selected");
-                  setSelectedCombo(itemIndex);
-                }}
-                onLayout={() => setSelectedCombo(0)}
-              >
-                {fillCombinationPicker()}
-              </Picker>
-            </View>
-            <View
-              style={{
-                flex: 1,
-                paddingLeft: 50,
-              }}
-            >
-              <Shaft length={50} diameter={barDiameter}>
-                <View style={{ width: 50 }}></View>
-                <Sleeve
-                  left={false}
-                  diameter={sleeveDiameter}
-                  width={loadableSleeveLength + flangeWidth}
-                >
-                  <Flange diameter={flangeDiameter} width={flangeWidth} />
-                  {displayPlateCombination()}
-                </Sleeve>
-              </Shaft>
-            </View>
+            <Text>WEIGHT TOTAL : </Text>
+            <Text style={styles.totalWeight}>{totalWeight}</Text>
           </View>
-        ) : (
-          <Shaft length={barLength} diameter={barDiameter}>
-            <Sleeve
-              left={true}
-              diameter={sleeveDiameter}
-              width={loadableSleeveLength + flangeWidth}
-            >
-              <Flange diameter={flangeDiameter} width={flangeWidth} />
-              {displayPlates()}
-            </Sleeve>
-            <Knurling barLength={barLength} />
-            <Sleeve
-              left={false}
-              diameter={sleeveDiameter}
-              width={loadableSleeveLength + flangeWidth}
-            >
-              <Flange diameter={flangeDiameter} width={flangeWidth} />
-              {displayPlates()}
-            </Sleeve>
-          </Shaft>
-        )}
-      </View>
-      <View style={styles.weightAmountRow}>
-        <Text>WEIGHT TOTAL : </Text>
-        <Text style={styles.totalWeight}>{totalWeight}</Text>
-        <MyButton
-          title={String(isKG ? "KG" : "LB")}
-          onPress={() => setIsKG(!isKG)}
-        />
-      </View>
-      <View style={styles.buttonRow}>
-        <MyButton
-          title={getPlateWeight("green", isKG)}
-          onPress={() => updatePlates("green")}
-          color={"olive"}
-        />
-        <MyButton
-          title={getPlateWeight("yellow", isKG)}
-          onPress={() => updatePlates("yellow")}
-          color={"gold"}
-        />
-        <MyButton
-          title={getPlateWeight("blue", isKG)}
-          onPress={() => updatePlates("blue")}
-          color={"blue"}
-        />
-        <MyButton
-          title={getPlateWeight("red", isKG)}
-          onPress={() => updatePlates("red")}
-          color={"crimson"}
-        />
-        <MyButton
-          title="REMOVE"
-          onPress={removeOutside}
-          disabled={plates.length < 1}
-        />
-        <MyButton
-          title="CLEAR"
-          onPress={clearBar}
-          disabled={plates.length < 1}
-        />
+          <MyButton
+            title={String(isKG ? "KG" : "LB")}
+            onPress={() => setIsKG(!isKG)}
+            square
+          />
+        </View>
+        <View style={styles.buttonRow}>
+          <MyButton
+            title={getPlateWeight("green", isKG)}
+            onPress={() => updatePlates("green")}
+            color={"olive"}
+            square
+          />
+          <MyButton
+            title={getPlateWeight("yellow", isKG)}
+            onPress={() => updatePlates("yellow")}
+            color={"gold"}
+            square
+          />
+          <MyButton
+            title={getPlateWeight("blue", isKG)}
+            onPress={() => updatePlates("blue")}
+            color={"blue"}
+            square
+          />
+          <MyButton
+            title={getPlateWeight("red", isKG)}
+            onPress={() => updatePlates("red")}
+            color={"crimson"}
+            square
+          />
+          <MyButton
+            title="REMOVE"
+            onPress={removeOutside}
+            disabled={plates.length < 1}
+            style={{ width: 180 }}
+          />
+          <MyButton
+            title="CLEAR"
+            onPress={clearBar}
+            disabled={plates.length < 1}
+            style={{ width: 180 }}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -307,19 +320,24 @@ export default function App() {
 
 const styles = StyleSheet.create({
   buttonRow: {
-    width: "100%",
+    backgroundColor: "grey",
     flexDirection: "row",
+    height: 45,
     justifyContent: "space-evenly",
+    width: "100%",
   },
   container: {
+    borderWidth: 1,
+    borderColor: "red",
     flex: 1,
     backgroundColor: "#fff",
-    // alignItems: "center",
-    justifyContent: "space-evenly",
+    justifyContent: "space-around",
   },
   totalWeight: { fontSize: 24, marginRight: 10 },
   weightAmountRow: {
+    backgroundColor: "green",
     flexDirection: "row",
     alignItems: "center",
+    height: 45,
   },
 });

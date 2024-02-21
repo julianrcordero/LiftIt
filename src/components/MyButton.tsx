@@ -7,6 +7,7 @@ type Props = {
   disabled?: boolean;
   color?: string;
   style?: any;
+  square?: boolean;
 };
 
 export const MyButton: FC<Props> = ({
@@ -15,6 +16,7 @@ export const MyButton: FC<Props> = ({
   disabled,
   color,
   style,
+  square = false,
 }) => {
   return (
     <TouchableOpacity
@@ -22,16 +24,25 @@ export const MyButton: FC<Props> = ({
       aria-disabled={disabled}
       style={[
         {
+          alignItems: "center",
+          justifyContent: "center",
           opacity: disabled ? 0.5 : 1,
           backgroundColor: color ?? "transparent",
           borderRadius: 5,
           borderWidth: 1,
-          padding: 10,
+          height: "100%",
         },
         style,
+        square && { aspectRatio: 1 },
       ]}
     >
-      <Text>{title}</Text>
+      <Text
+        style={{
+          textAlign: "center",
+        }}
+      >
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 };
